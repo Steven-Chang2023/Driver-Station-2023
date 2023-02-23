@@ -1,4 +1,4 @@
-from button import Button
+import button
 from tkinter import Tk, Canvas, CENTER, RIGHT, LEFT, N, PhotoImage
 import math
 import os
@@ -17,96 +17,103 @@ ser = serial.Serial("/dev/ttyAMA0", 9600)  # /dev/ttyAMA0 on the pi
 
 root = Tk()
 # Full screen
+# Full screen
 if not test:
     root.overrideredirect(True)
-    root.geometry("{0}x{1}+0+0".format(root.winfo_screenwidth(), root.winfo_screenheight()))
-    root.focus_set()  #Move focus to this widget
+    root.geometry("{0}x{1}+0+0".format(root.winfo_screenwidth(),
+                                       root.winfo_screenheight()))
+    root.focus_set()  # Move focus to this widget
     root.bind("<Escape>", lambda e: root.quit())
     root.config(cursor="none")
 
 # Variables
 height = 480
 width = 800
+btnW = 130
+btnH = 100
+btnX = 420
+btnY = 80
+padding = 40
 color_inactive = "white"
-color_active = "#32CD32" # lime green
+color_active = "green"
 
 # Delay between pushes (ms)
 delay = 10
 
-# Limelight zoom buttons
-# Intake mode buttons
-btnY = 340
-padding = 20
+# Button Dimensions and button objects
+bNeutral = button.Button('btnN', 80, btnY  + btnH + padding, btnW, btnH, "neutral", color_inactive)
+b1 = button.Button('btn1', btnX-(btnW + padding), btnY, btnW, btnH, "1", color_inactive)
+b2 = button.Button('btn2', btnX-(btnW + padding), btnY + btnH + padding,
+                   btnW, btnH, "2", color_inactive)
+b3 = button.Button('btn3', btnX-(btnW + padding), btnY + (btnH + padding)
+                   * 2, btnW, btnH, "3", color_inactive)
+b4 = button.Button('btn4', btnX, btnY, btnW, btnH, "4", color_inactive)
+b5 = button.Button('btn5', btnX, btnY + btnH + padding,
+                   btnW, btnH, "5", color_inactive)
+b6 = button.Button('btn6', btnX, btnY + (btnH + padding)
+                   * 2, btnW, btnH, "6", color_inactive)
+b7 = button.Button('btn7', btnX+(btnW + padding), btnY, btnW, btnH, "7", color_inactive)
+b8 = button.Button('btn8', btnX+(btnW + padding), btnY + btnH + padding,
+                   btnW, btnH, "8", color_inactive)
+b9 = button.Button('btn9', btnX+(btnW + padding), btnY + (btnH + padding)
+                   * 2, btnW, btnH, "9", color_inactive)
 
-# Hook buttons
-btnX = 20
-btnW = 2*250 + padding
-btnH = 100
-btnY = 360
-
+buttonArray = [b1,b2,b3,b4,b5,b6,b7,b8,b9,bNeutral]
 # Exit button - top left
-ex = Button('exit', 0, 0, 25, 25, "X", "red")
+ex = button.Button('exit', 0, 0, 25, 25, "X", "red")
 
-
-btnW = 250
-btnH = 120
-btnX = 420
-btnY = 115
-padding = 20
-b1 = Button('1x', width/3 - width/4, height/3, btnW, btnH, '1x', color_active, 32)
-b2 = Button('2x', width*2/3 - btnW +  width/4, height/3, btnW, btnH, '2x', color_inactive, 32)
-
-# All buttons
-btns = [b1, b2, ex]
-
-zoom1x = PhotoImage(file="1xzoom.gif")
-zoom2x = PhotoImage(file="2xzoom.gif")
 # Canvas object
 ctx = Canvas(root, width=width, height=height, background="black")
 ctx.pack()
 
+# Background
+#bg = Image.open(os.path.join(dirname, './field.png'))
+#bg = ImageTk.PhotoImage(bg)
+#ctx.create_image(width/2, height/2, anchor=CENTER, image=bg)
 
 # Text at top
-ctx.create_text(width/2, height/5, justify=CENTER, text="Limelight zoom", font=("Arial", 28), fill="White")
+ctx.create_text(400, 25, justify=CENTER, text="Choose a starting position", font=(
+    "Arial", 28), fill="White")
 
-ctx.create_image(width/3-width/4+b1.wdith/2, height*4/5, image=zoom1x, tag="1xzoom", anchor=CENTER)
-# ctx.create_rectangle(width/3-width/4, height*4/5-90, width/3-width/4+b1.wdith, height*4/5+b1.height/2, outline="green", tag="1xzoomrect")
-ctx.create_image(width*2/3 - btnW/2 +  width/4, height*4/5, image=zoom2x, tag="2xzoom", anchor=CENTER)
-# ctx.create_rectangle(width/3-width/4, height*4/5-90, width/3-width/4+b1.wdith, height*4/5+b1.height/2, outline="green", tag="1xzoomrect")
-
-# State variables
-zoom = 1
-mode = 0
-hook = 0
 
 def handle_click(event):
-    global zoom, mode
     if not test:
         event.x = math.fabs(event.x-800)
         event.y = math.fabs(event.y-480)
 
-    for btn in btns: btn.checkClicked(event)
-
-    if ex.isClicked: exit()
-
-    if b1.isClicked:
-        b1.color = color_active
-        b2.color = color_inactive
-        zoom = 1
-    elif b2.isClicked:
-        b1.color = color_inactive
-        b2.color = color_active
-        zoom = 2
+    # If any of the buttons are clicked, theere is a new line saying "selected"
+    # and set the others to the position name, otherwise set them all to the position
+    bNeutral.checkClicked(event)
+    b1.checkClicked(event)
+    b2.checkClicked(event)
+    b3.checkClicked(event)
+    b4.checkClicked(event)
+    b5.checkClicked(event)
+    b6.checkClicked(event)
+    b7.checkClicked(event)
+    b8.checkClicked(event)
+    b9.checkClicked(event)
+    ex.checkClicked(event)
+    for but in buttonArray:
+        if(but.isClicked):
+            but.color = color_active
+        else:
+            but.color = color_inactive
+    
+    if (ex.isClicked):
+        exit()
+    
+    
     
     drawStuff()
 
 
 def drawStuff():
-    for btn in btns: btn.drawButton(ctx)
-    
-    ctx.delete('curr_msg')
-    ctx.delete('next_msg')
-    ctx.delete('next_title')
+    # Draw different Starting Positions
+    bNeutral.drawButton(ctx)
+    ex.drawButton(ctx)
+    for button in buttonArray:
+        button.drawButton(ctx)
 
 
 drawStuff()
@@ -116,11 +123,27 @@ ctx.pack()
 
 
 def publish():
-    hook_bit = hook & 1
-    val = (hook_bit << 2) | (mode << 1) | (zoom - 1) # Lower bit is zoom, second bit is mode, third bit is hook toggle
-    if test:
-        print('{0:04b}'.format(val))
-    ser.write(val.to_bytes(1, byteorder='big'))
+    if (b1.isClicked):
+        print(1)
+    elif (b2.isClicked):
+        print(2)
+    elif (b3.isClicked):
+        print(3)
+    elif (b4.isClicked):
+        print(4)
+    elif (b5.isClicked):
+        print(5)
+    elif (b6.isClicked):
+        print(6)
+    elif (b7.isClicked):
+        print(7)
+    elif (b8.isClicked):
+        print(8)
+    elif (b9.isClicked):
+        print(9)
+    elif(bNeutral.isClicked):
+        print("zamn")
+    
     root.after(delay, publish)
 
 
