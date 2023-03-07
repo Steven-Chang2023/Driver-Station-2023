@@ -6,7 +6,7 @@ import os
 
 dirname = os.path.dirname(__file__)
 
-test = True
+test = False
 
 if test:
     import fakeSerial as serial
@@ -123,11 +123,11 @@ ctx.pack()
 
 def publish():
     if (b1.isClicked):
-        print(1)
+        ser.write(b'\x01')
     elif (b2.isClicked):
-        print(2)
+        ser.write(b'\x02')
     elif (b3.isClicked):
-        print(3)
+        ser.write(b'\x03')
     elif (bNeutral.isClicked):
          print("zamn")
     root.after(delay, publish)
